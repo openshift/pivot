@@ -16,6 +16,7 @@ func RunGetOutln(command string, args ...string) string {
 // Run executes a command on the local system and returns the output
 // in string format
 func Run(command string, args ...string) string {
+	fmt.Printf("Running: %s %s\n", command, strings.Join(args, " "))
 	rawOut, err := exec.Command(command, args...).Output()
 	if err != nil {
 		Fatal(fmt.Sprintf("Unable to run command %s: %s", command, err))
