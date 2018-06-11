@@ -128,7 +128,7 @@ func main() {
 	podmanRemove(PivotName)
 
 	// By default, delete the image.
-	if keep {
+	if !keep {
 		utils.Run("podman", "rmi", imgid)
 	}
 }
