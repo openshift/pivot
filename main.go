@@ -10,6 +10,7 @@ import (
 	"strings"
 	// TODO: update to official location
 	"github.com/ashcrow/pivot/types"
+	"github.com/ashcrow/pivot/utils"
 )
 
 const (
@@ -26,23 +27,6 @@ var version string
 func fatal(msg string) {
 	fmt.Fprintln(os.Stderr, msg)
 	os.Exit(1)
-}
-
-// runGetOutln executes a system command, turns the result into a string
-// and trims white space before and after the string
-func runGetOutln(command string, args ...string) string {
-	rawOut := run(command, args...)
-	return strings.TrimSpace(string(rawOut))
-}
-
-// run executes a command on the local system and returns the output
-// in string format
-func run(command string, args ...string) string {
-	rawOut, err := exec.Command(command, args...).Output()
-	if err != nil {
-		fatal(fmt.Sprintf("Unable to run command %s: %s", command, err))
-	}
-	return string(rawOut)
 }
 
 // podmanRemove kills and removes a container
@@ -116,14 +100,14 @@ func main() {
 	//Clean up a previous container
 	podmanRemove(PivotName)
 	// `podman mount` wants a running container, so let's make a dummy one
-	cid := runGetOutln("podman", "run", "-d", "--name",
+	cid := utils.RunGetOutln("podman", "run", "-d", "--name",
 		PivotName, "--entrypoint", "sleep", imgid, "infinity")
 	// Use the container ID to find its mount point
-	mnt := runGetOutln("podman", "mount", cid)
+	mnt := utils.RunGetOutln("podman", "mount", cid)
 	os.Chdir(mnt)
 
 	// List all refs from the OSTree repository embedded in the container
-	refsCombined := run("ostree", "--repo=srv/tree/repo", "refs")
+	refsCombined := utils.Run("ostree", "--repo=srv/tree/repo", "refs")
 	refs := strings.Split(refsCombined, "\n")
 	rlen := len(refs)
 	// Today, we only support one ref.  Down the line we may do multiple.
@@ -132,15 +116,15 @@ func main() {
 	}
 	targetRef := refs[0]
 	// Find the concrete OSTree commit
-	rev := runGetOutln("ostree", "--repo=srv/tree/repo", "rev-parse", targetRef)
+	rev := utils.RunGetOutln("ostree", "--repo=srv/tree/repo", "rev-parse", targetRef)
 
 	// Use pull-local to extract the data into the system repo; this is *significantly*
 	// faster than talking to the container over HTTP.
-	run("ostree", "pull-local", "srv/tree/repo", rev)
+	utils.Run("ostree", "pull-local", "srv/tree/repo", rev)
 
 	// The leading ':' here means "no remote".  See also
 	// https://github.com/projectatomic/rpm-ostree/pull/1396
-	run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev))
+	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev))
 
 	// Done!  Write our stamp file.  TODO: Teach rpm-ostree how to encode
 	// this data in the origin.
@@ -154,6 +138,6 @@ func main() {
 
 	// By default, delete the image.
 	if keep {
-		run("podman", "rmi", imgid)
+		utils.Run("podman", "rmi", imgid)
 	}
 }
