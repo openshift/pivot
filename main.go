@@ -73,7 +73,7 @@ func main() {
 	fmt.Printf("Previous pivot: %s\n", previousPivot)
 
 	// Use skopeo to find the sha256, so we can refer to it reliably
-	output := utils.Run("skopeo", "inspect", fmt.Sprintf("docker://%s", container))
+	output := utils.RunGetOut("skopeo", "inspect", fmt.Sprintf("docker://%s", container))
 
 	var imagedata types.ImageInspection
 	json.Unmarshal([]byte(output), &imagedata)
@@ -98,7 +98,7 @@ func main() {
 	os.Chdir(mnt)
 
 	// List all refs from the OSTree repository embedded in the container
-	refsCombined := utils.Run("ostree", "--repo=srv/tree/repo", "refs")
+	refsCombined := utils.RunGetOut("ostree", "--repo=srv/tree/repo", "refs")
 	refs := strings.Split(refsCombined, "\n")
 	rlen := len(refs)
 	// Today, we only support one ref.  Down the line we may do multiple.
