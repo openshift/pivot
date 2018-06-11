@@ -69,8 +69,8 @@ func main() {
 			utils.Fatal(fmt.Sprintf("Unable to read %s: %s", PivotDonePath, err))
 		}
 		previousPivot = strings.TrimSpace(string(content))
+		fmt.Printf("Previous pivot: %s\n", previousPivot)
 	}
-	fmt.Printf("Previous pivot: %s\n", previousPivot)
 
 	// Use skopeo to find the sha256, so we can refer to it reliably
 	output := utils.RunGetOut("skopeo", "inspect", fmt.Sprintf("docker://%s", container))
