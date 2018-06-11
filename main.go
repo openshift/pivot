@@ -99,7 +99,7 @@ func main() {
 
 	// List all refs from the OSTree repository embedded in the container
 	refsCombined := utils.RunGetOut("ostree", "--repo=srv/tree/repo", "refs")
-	refs := strings.Split(refsCombined, "\n")
+	refs := strings.Split(strings.TrimSpace(refsCombined), "\n")
 	rlen := len(refs)
 	// Today, we only support one ref.  Down the line we may do multiple.
 	if rlen != 1 {
