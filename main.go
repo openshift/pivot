@@ -24,11 +24,6 @@ const (
 var commitHash string
 var version string
 
-func fatal(msg string) {
-	fmt.Fprintln(os.Stderr, msg)
-	os.Exit(1)
-}
-
 // podmanRemove kills and removes a container
 func podmanRemove(cid string) {
 	exec.Command("podman", "kill", cid)
@@ -59,7 +54,7 @@ func main() {
 
 	arguments := flag.Args()
 	if len(arguments) != 1 {
-		fatal("Only one argument name may be provided")
+		utils.Fatal("Only one argument name may be provided")
 	}
 	container = arguments[0]
 
@@ -71,7 +66,7 @@ func main() {
 	if _, err := os.Stat(PivotDonePath); err == nil {
 		content, err := ioutil.ReadFile(PivotDonePath)
 		if err != nil {
-			fatal(fmt.Sprintf("Unable to read %s: %s", PivotDonePath, err))
+			utils.Fatal(fmt.Sprintf("Unable to read %s: %s", PivotDonePath, err))
 		}
 		previousPivot = strings.TrimSpace(string(content))
 	}
@@ -81,7 +76,7 @@ func main() {
 	output, err := exec.Command(
 		"skopeo", "inspect", fmt.Sprintf("docker://%s", container)).Output()
 	if err != nil {
-		fatal(fmt.Sprintf("Unable to run skopeo: %s", err))
+		utils.Fatal(fmt.Sprintf("Unable to run skopeo: %s", err))
 	}
 
 	var imagedata types.ImageInspection
@@ -112,7 +107,7 @@ func main() {
 	rlen := len(refs)
 	// Today, we only support one ref.  Down the line we may do multiple.
 	if rlen != 1 {
-		fatal(fmt.Sprintf("Found %d refs, expected exactly 1", rlen))
+		utils.Fatal(fmt.Sprintf("Found %d refs, expected exactly 1", rlen))
 	}
 	targetRef := refs[0]
 	// Find the concrete OSTree commit
@@ -130,7 +125,7 @@ func main() {
 	// this data in the origin.
 	err = ioutil.WriteFile(PivotDonePath, []byte(fmt.Sprintf("%s\n", imgid)), 0644)
 	if err != nil {
-		fatal(fmt.Sprintf("Unable to write the new imgid of %s to %s", imgid, PivotDonePath))
+		utils.Fatal(fmt.Sprintf("Unable to write the new imgid of %s to %s", imgid, PivotDonePath))
 	}
 
 	// Kill our dummy container
