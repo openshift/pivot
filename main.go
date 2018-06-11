@@ -73,14 +73,10 @@ func main() {
 	fmt.Printf("Previous pivot: %s\n", previousPivot)
 
 	// Use skopeo to find the sha256, so we can refer to it reliably
-	output, err := exec.Command(
-		"skopeo", "inspect", fmt.Sprintf("docker://%s", container)).Output()
-	if err != nil {
-		utils.Fatal(fmt.Sprintf("Unable to run skopeo: %s", err))
-	}
+	output := utils.Run("skopeo", "inspect", fmt.Sprintf("docker://%s", container))
 
 	var imagedata types.ImageInspection
-	json.Unmarshal(output, &imagedata)
+	json.Unmarshal([]byte(output), &imagedata)
 	imgid := fmt.Sprintf("%s@%s", container, imagedata.Digest)
 
 	if previousPivot == imgid {
@@ -123,7 +119,7 @@ func main() {
 
 	// Done!  Write our stamp file.  TODO: Teach rpm-ostree how to encode
 	// this data in the origin.
-	err = ioutil.WriteFile(PivotDonePath, []byte(fmt.Sprintf("%s\n", imgid)), 0644)
+	err := ioutil.WriteFile(PivotDonePath, []byte(fmt.Sprintf("%s\n", imgid)), 0644)
 	if err != nil {
 		utils.Fatal(fmt.Sprintf("Unable to write the new imgid of %s to %s", imgid, PivotDonePath))
 	}
