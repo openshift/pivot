@@ -26,8 +26,8 @@ var version string
 
 // podmanRemove kills and removes a container
 func podmanRemove(cid string) {
-	exec.Command("podman", "kill", cid)
-	exec.Command("podman", "rm", "-f", cid)
+	exec.Command("podman", "kill", cid).Run();
+	exec.Command("podman", "rm", "-f", cid).Run();
 }
 
 // TODO: much of the main function should be broken up into functions and
@@ -85,7 +85,7 @@ func main() {
 	}
 
 	// Pull the image
-	exec.Command("podman", "pull", imgid)
+	utils.Run("podman", "pull", imgid);
 	fmt.Printf("Pivoting to: %s", imgid)
 
 	//Clean up a previous container
