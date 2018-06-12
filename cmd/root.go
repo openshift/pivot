@@ -23,7 +23,7 @@ var container string
 // RootCmd houses the cobra config for the main command
 var RootCmd = &cobra.Command{
 	Use:   "pivot",
-	Short: "",
+	Short: "Allows moving from one OSTree deployment to another",
 	//	Long: ``,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
