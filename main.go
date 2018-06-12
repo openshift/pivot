@@ -80,13 +80,13 @@ func main() {
 	imgid := fmt.Sprintf("%s@%s", container, imagedata.Digest)
 
 	if previousPivot == imgid {
-		fmt.Printf("Already pivoted to: %s", imgid)
+		fmt.Printf("Already pivoted to: %s\n", imgid)
 		os.Exit(0)
 	}
 
 	// Pull the image
 	utils.Run("podman", "pull", imgid);
-	fmt.Printf("Pivoting to: %s", imgid)
+	fmt.Printf("Pivoting to: %s\n", imgid)
 
 	//Clean up a previous container
 	podmanRemove(PivotName)
