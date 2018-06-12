@@ -119,4 +119,9 @@ func Execute(cmd *cobra.Command, args []string) {
 	if !keep {
 		utils.Run("podman", "rmi", imgid)
 	}
+
+	// Reboot the machine if asked to do so
+	if reboot {
+		utils.Run("systemctl", "reboot")
+	}
 }
