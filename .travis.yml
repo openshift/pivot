@@ -1,0 +1,24 @@
+language: go
+
+go:
+  - 1.9
+  - tip
+
+matrix:
+  allow_failures:
+    - go: tip
+  fast_finish: true
+
+notifications:
+  email: false
+
+# Required since the clone will not always be tested from inside the same namespace
+before_script:
+  - mkdir -p $HOME/gopath/src/github.com/ashcrow/image-helpgen/
+  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/ashcrow/image-helpgen/
+
+script:
+  - make lint
+  - make deps
+  - dep status
+  - make build
