@@ -11,6 +11,7 @@ import (
 
 	"github.com/ashcrow/pivot/types"
 	"github.com/ashcrow/pivot/utils"
+	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 )
 
@@ -54,10 +55,10 @@ func Execute(cmd *cobra.Command, args []string) {
 	if _, err := os.Stat(types.PivotDonePath); err == nil {
 		content, err := ioutil.ReadFile(types.PivotDonePath)
 		if err != nil {
-			utils.Fatal(fmt.Sprintf("Unable to read %s: %s", types.PivotDonePath, err))
+			glog.Fatalf("Unable to read %s: %s", types.PivotDonePath, err)
 		}
 		previousPivot = strings.TrimSpace(string(content))
-		fmt.Printf("Previous pivot: %s\n", previousPivot)
+		glog.Infof("Previous pivot: %s\n", previousPivot)
 	}
 
 	// Use skopeo to find the sha256, so we can refer to it reliably
@@ -68,13 +69,12 @@ func Execute(cmd *cobra.Command, args []string) {
 	imgid := fmt.Sprintf("%s@%s", container, imagedata.Digest)
 
 	if previousPivot == imgid {
-		fmt.Printf("Already pivoted to: %s\n", imgid)
-		os.Exit(0)
+		glog.Fatalf("Already pivoted to: %s\n", imgid)
 	}
 
 	// Pull the image
 	utils.Run("podman", "pull", imgid)
-	fmt.Printf("Pivoting to: %s\n", imgid)
+	glog.Infof("Pivoting to: %s\n", imgid)
 
 	//Clean up a previous container
 	podmanRemove(types.PivotName)
@@ -91,7 +91,7 @@ func Execute(cmd *cobra.Command, args []string) {
 	rlen := len(refs)
 	// Today, we only support one ref.  Down the line we may do multiple.
 	if rlen != 1 {
-		utils.Fatal(fmt.Sprintf("Found %d refs, expected exactly 1", rlen))
+		glog.Fatalf("Found %d refs, expected exactly 1", rlen)
 	}
 	targetRef := refs[0]
 	// Find the concrete OSTree commit
@@ -109,7 +109,7 @@ func Execute(cmd *cobra.Command, args []string) {
 	// this data in the origin.
 	err := ioutil.WriteFile(types.PivotDonePath, []byte(fmt.Sprintf("%s\n", imgid)), 0644)
 	if err != nil {
-		utils.Fatal(fmt.Sprintf("Unable to write the new imgid of %s to %s", imgid, types.PivotDonePath))
+		glog.Fatalf("Unable to write the new imgid of %s to %s", imgid, types.PivotDonePath)
 	}
 
 	// Kill our dummy container
