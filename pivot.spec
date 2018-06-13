@@ -26,12 +26,11 @@ deployment to another with minimal effort.
 %prep
 %autosetup -n %{name}-%{version}
 mkdir -p src/github.com/ashcrow/%{name}/
-cp -rf cmd  Gopkg.lock  Gopkg.toml  LICENSE  main.go  Makefile  pivot.spec  README.md  types  utils  VERSION src/github.com/ashcrow/%{name}
+cp -rf cmd  Gopkg.lock  Gopkg.toml  LICENSE  main.go  Makefile  pivot.spec  README.md  types  utils vendor VERSION src/github.com/ashcrow/%{name}
 
 %build
 export GOPATH=`pwd`
 cd src/github.com/ashcrow/%{name}/
-make deps
 make build
 
 %install

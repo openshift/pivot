@@ -8,6 +8,5 @@ pivot
 build
 -----
 ```
-make deps
 make build
 ```
