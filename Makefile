@@ -1,5 +1,5 @@
 VERSION := $(shell cat ./VERSION)
-COMMIT_HASH := $(shell git rev-parse HEAD)
+COMMIT_HASH := $(shell git rev-parse HEAD 2>/dev/null || true)
 BUILD_TIME := $(shell date +%s)
 DEFAULT_TEMPLATE := /etc/image-helpgen/template.tpl
 
