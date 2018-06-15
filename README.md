@@ -10,3 +10,19 @@ build
 ```
 make build
 ```
+
+OR
+
+```
+make static
+```
+
+Example Usage
+-------------
+```
+pivot -r $REGISTRY/os:latest
+```
+
+See
+---
+- [openshift/os](https://github.com/openshift/os/)
