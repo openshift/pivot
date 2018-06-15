@@ -12,12 +12,7 @@ Source0:        https://github.com/ashcrow/%{name}/archive/v%{version}.tar.gz
 
 
 BuildRequires:  git
-%if 0%{?fedora}
 BuildRequires:  %{?go_compiler:compiler(go-compiler)}%{!?go_compiler:golang >= 1.6.2}
-%endif #fedora
-%if 0%{?centos}
-BuildRequires:  golang
-%endif #centos
 
 %description
 pivot provides a simple command allowing you to move from one OSTree
