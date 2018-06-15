@@ -9,11 +9,12 @@ LDFLAGS := -X main.version=${VERSION} -X main.commitHash=${COMMIT_HASH} -X main.
 CONFIG_DIR ?= /etc
 BIN_DIR ?= /usr/bin
 
-.PHONY: help build clean deps install lint test
+.PHONY: help build clean deps install lint static test
 
 help:
 	@echo "Targets:"
 	@echo " - build: Build the target binary"
+	@echo " - static: Build a static binary"
 	@echo " - clean: Clean up after build"
 	@echo " - deps: Install required tool and dependencies for building"
 	@echo " - install: Install build results to the system"
@@ -30,6 +31,9 @@ help:
 build: clean
 	go build -ldflags '${LDFLAGS}' -o pivot main.go
 	strip pivot
+
+static: clean
+	CGO_ENABLED=0 go build -ldflags '${LDFLAGS} -w -extldflags "-static"' -a -o pivot main.go
 
 clean:
 	rm -f pivot
