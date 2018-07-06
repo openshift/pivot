@@ -86,7 +86,7 @@ func Execute(cmd *cobra.Command, args []string) {
 	os.Chdir(mnt)
 
 	// List all refs from the OSTree repository embedded in the container
-	refsCombined := utils.RunGetOut("ostree", "--repo=srv/tree/repo", "refs")
+	refsCombined := utils.RunGetOut("ostree", "--repo=srv/repo", "refs")
 	refs := strings.Split(strings.TrimSpace(refsCombined), "\n")
 	rlen := len(refs)
 	// Today, we only support one ref.  Down the line we may do multiple.
@@ -95,11 +95,11 @@ func Execute(cmd *cobra.Command, args []string) {
 	}
 	targetRef := refs[0]
 	// Find the concrete OSTree commit
-	rev := utils.RunGetOutln("ostree", "--repo=srv/tree/repo", "rev-parse", targetRef)
+	rev := utils.RunGetOutln("ostree", "--repo=srv/repo", "rev-parse", targetRef)
 
 	// Use pull-local to extract the data into the system repo; this is *significantly*
 	// faster than talking to the container over HTTP.
-	utils.Run("ostree", "pull-local", "srv/tree/repo", rev)
+	utils.Run("ostree", "pull-local", "srv/repo", rev)
 
 	// The leading ':' here means "no remote".  See also
 	// https://github.com/projectatomic/rpm-ostree/pull/1396
