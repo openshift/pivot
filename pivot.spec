@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 Name:           pivot
-Version:        0.0.0
+Version:        0.0.1
 Release:        0.1%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
@@ -40,5 +40,8 @@ install --mode 755 src/github.com/ashcrow/%{name}/%{name} %{buildroot}%{_bindir}
 
 
 %changelog
+* Thu Aug  9 2018 Steve Milner <smilner@redhat.com> - 0.0.1-0.1
+- Multiple fixes
+
 * Wed Jun 13 2018 Steve Milner <smilner@redhat.com> - 0.0.0-0.1
 - Initial spec
