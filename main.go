@@ -15,10 +15,19 @@ import (
 var commitHash string
 var version string
 
+// showHeader generates and prints the program header line
+func showHeader() {
+	header := fmt.Sprintf("pivot version %s", version)
+	// If we have a commit hash then add it to the program header
+	if commitHash != "" {
+		header = fmt.Sprintf("%s (%s)", header, commitHash)
+	}
+	fmt.Println(header)
+}
+
 // main is the entry point for the command
 func main() {
-	fmt.Printf("pivot version %s (%s)\n", version, commitHash)
-
+	showHeader()
 	flag.CommandLine.Parse([]string{})
 	pflag.Set("logtostderr", "true")
 
