@@ -1,7 +1,8 @@
 language: go
 
 go:
-  - 1.9
+  - "1.10.x"
+  - "1.11.x"
   - tip
 
 matrix:
@@ -14,8 +15,8 @@ notifications:
 
 # Required since the clone will not always be tested from inside the same namespace
 before_script:
-  - mkdir -p $HOME/gopath/src/github.com/ashcrow/image-helpgen/
-  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/ashcrow/image-helpgen/
+  - mkdir -p $HOME/gopath/src/github.com/ashcrow/pivot/
+  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/ashcrow/pivot/
 
 script:
   - make lint
