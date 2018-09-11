@@ -103,7 +103,7 @@ func Execute(cmd *cobra.Command, args []string) {
 
 	// The leading ':' here means "no remote".  See also
 	// https://github.com/projectatomic/rpm-ostree/pull/1396
-	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev))
+	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev), "--custom-origin-url", imgid, "--custom-origin-description", "Managed by pivot tool")
 
 	// Done!  Write our stamp file.  TODO: Teach rpm-ostree how to encode
 	// this data in the origin.
