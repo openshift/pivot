@@ -61,12 +61,12 @@ func Execute(cmd *cobra.Command, args []string) {
 		glog.Infof("Previous pivot: %s\n", previousPivot)
 	}
 
-	// Use skopeo to find the sha256, so we can refer to it reliably
+	// Use skopeo to canonicalize to $name@$digest, so we can refer to it reliably
 	output := utils.RunGetOut("skopeo", "inspect", fmt.Sprintf("docker://%s", container))
 
 	var imagedata types.ImageInspection
 	json.Unmarshal([]byte(output), &imagedata)
-	imgid := fmt.Sprintf("%s@%s", container, imagedata.Digest)
+	imgid := fmt.Sprintf("%s@%s", imagedata.Name, imagedata.Digest)
 
 	if previousPivot == imgid {
 		glog.Fatalf("Already pivoted to: %s\n", imgid)
