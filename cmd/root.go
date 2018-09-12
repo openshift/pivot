@@ -16,7 +16,6 @@ import (
 )
 
 // flag storage
-var touchIfChanged bool
 var keep bool
 var reboot bool
 var container string
@@ -37,7 +36,6 @@ var RootCmd = &cobra.Command{
 
 // Executes upon import
 func init() {
-	RootCmd.PersistentFlags().BoolVarP(&touchIfChanged, "touch-if-changed", "t", false, "if changed, touch a file")
 	RootCmd.PersistentFlags().BoolVarP(&keep, "keep", "k", false, "Do not remove container image")
 	RootCmd.PersistentFlags().BoolVarP(&reboot, "reboot", "r", false, "reboot if changed")
 }
