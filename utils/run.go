@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -25,7 +24,7 @@ func Run(command string, args ...string) {
 
 // Like Run(), but get the output as a string
 func RunGetOut(command string, args ...string) string {
-	fmt.Printf("Running: %s %s\n", command, strings.Join(args, " "))
+	glog.Infof("Running: %s %s\n", command, strings.Join(args, " "))
 	cmd := exec.Command(command, args...)
 	// Pass through by default
 	cmd.Stderr = os.Stderr
