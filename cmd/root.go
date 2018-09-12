@@ -70,7 +70,8 @@ func Execute(cmd *cobra.Command, args []string) {
 	imgid := fmt.Sprintf("%s@%s", imagedata.Name, imagedata.Digest)
 
 	if previousPivot == imgid {
-		glog.Fatalf("Already pivoted to: %s\n", imgid)
+		glog.Info("Already at target pivot; exiting...\n")
+		return
 	}
 
 	// Pull the image
