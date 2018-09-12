@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -49,17 +48,33 @@ func podmanRemove(cid string) {
 	exec.Command("podman", "rm", "-f", cid).Run()
 }
 
+func getDefaultDeployment() types.RpmOstreeDeployment {
+	// use --status for now, we can switch to D-Bus if we need more info
+	var rosState types.RpmOstreeState
+	output := utils.RunGetOut("rpm-ostree", "status", "--json")
+	if err := json.Unmarshal([]byte(output), &rosState); err != nil {
+		glog.Fatalf("Failed to parse `rpm-ostree status --json` output: %v", err)
+	}
+
+	// just make it a hard error if we somehow don't have any deployments
+	if len(rosState.Deployments) == 0 {
+		glog.Fatalf("Not currently booted in a deployment")
+	}
+
+	return rosState.Deployments[0]
+}
+
 // Execute runs the command
 func Execute(cmd *cobra.Command, args []string) {
 	container := args[0]
+	defaultDeployment := getDefaultDeployment()
+
 	previousPivot := ""
-	if _, err := os.Stat(types.PivotDonePath); err == nil {
-		content, err := ioutil.ReadFile(types.PivotDonePath)
-		if err != nil {
-			glog.Fatalf("Unable to read %s: %s", types.PivotDonePath, err)
+	if len(defaultDeployment.CustomOrigin) > 0 {
+		if strings.HasPrefix(defaultDeployment.CustomOrigin[0], "pivot://") {
+			previousPivot = defaultDeployment.CustomOrigin[0][len("pivot://"):]
+			glog.Infof("Previous pivot: %s\n", previousPivot)
 		}
-		previousPivot = strings.TrimSpace(string(content))
-		glog.Infof("Previous pivot: %s\n", previousPivot)
 	}
 
 	// Use skopeo to canonicalize to $name@$digest, so we can refer to it reliably
@@ -78,8 +93,9 @@ func Execute(cmd *cobra.Command, args []string) {
 	utils.Run("podman", "pull", imgid)
 	glog.Infof("Pivoting to: %s\n", imgid)
 
-	//Clean up a previous container
+	// Clean up a previous container
 	podmanRemove(types.PivotName)
+
 	// `podman mount` wants a running container, so let's make a dummy one
 	cid := utils.RunGetOutln("podman", "run", "-d", "--name",
 		types.PivotName, "--entrypoint", "sleep", imgid, "infinity")
@@ -108,13 +124,9 @@ func Execute(cmd *cobra.Command, args []string) {
 
 	// The leading ':' here means "no remote".  See also
 	// https://github.com/projectatomic/rpm-ostree/pull/1396
-	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev), "--custom-origin-url", customUrl, "--custom-origin-description", "Managed by pivot tool")
-
-	// Done!  Write our stamp file.
-	err := ioutil.WriteFile(types.PivotDonePath, []byte(fmt.Sprintf("%s\n", imgid)), 0644)
-	if err != nil {
-		glog.Fatalf("Unable to write the new imgid of %s to %s", imgid, types.PivotDonePath)
-	}
+	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev),
+	          "--custom-origin-url", customUrl,
+	          "--custom-origin-description", "Managed by pivot tool")
 
 	// Kill our dummy container
 	podmanRemove(types.PivotName)
