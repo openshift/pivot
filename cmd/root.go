@@ -101,12 +101,14 @@ func Execute(cmd *cobra.Command, args []string) {
 	// faster than talking to the container over HTTP.
 	utils.Run("ostree", "pull-local", "srv/repo", rev)
 
+	// This will be what will be displayed in `rpm-ostree status` as the "origin spec"
+	customUrl := fmt.Sprintf("pivot://%s", imgid)
+
 	// The leading ':' here means "no remote".  See also
 	// https://github.com/projectatomic/rpm-ostree/pull/1396
-	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev), "--custom-origin-url", imgid, "--custom-origin-description", "Managed by pivot tool")
+	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev), "--custom-origin-url", customUrl, "--custom-origin-description", "Managed by pivot tool")
 
-	// Done!  Write our stamp file.  TODO: Teach rpm-ostree how to encode
-	// this data in the origin.
+	// Done!  Write our stamp file.
 	err := ioutil.WriteFile(types.PivotDonePath, []byte(fmt.Sprintf("%s\n", imgid)), 0644)
 	if err != nil {
 		glog.Fatalf("Unable to write the new imgid of %s to %s", imgid, types.PivotDonePath)
