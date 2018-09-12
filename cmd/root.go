@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"flag"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"github.com/ashcrow/pivot/utils"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // flag storage
@@ -38,6 +40,7 @@ var RootCmd = &cobra.Command{
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&keep, "keep", "k", false, "Do not remove container image")
 	RootCmd.PersistentFlags().BoolVarP(&reboot, "reboot", "r", false, "reboot if changed")
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 }
 
 // podmanRemove kills and removes a container
