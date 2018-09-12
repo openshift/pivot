@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"flag"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -48,6 +48,7 @@ func podmanRemove(cid string) {
 	exec.Command("podman", "rm", "-f", cid).Run()
 }
 
+// getDefaultDeployment uses rpm-ostree status --json to get the current deployment
 func getDefaultDeployment() types.RpmOstreeDeployment {
 	// use --status for now, we can switch to D-Bus if we need more info
 	var rosState types.RpmOstreeState
@@ -120,13 +121,13 @@ func Execute(cmd *cobra.Command, args []string) {
 	utils.Run("ostree", "pull-local", "srv/repo", rev)
 
 	// This will be what will be displayed in `rpm-ostree status` as the "origin spec"
-	customUrl := fmt.Sprintf("pivot://%s", imgid)
+	customURL := fmt.Sprintf("pivot://%s", imgid)
 
 	// The leading ':' here means "no remote".  See also
 	// https://github.com/projectatomic/rpm-ostree/pull/1396
 	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev),
-	          "--custom-origin-url", customUrl,
-	          "--custom-origin-description", "Managed by pivot tool")
+		"--custom-origin-url", customURL,
+		"--custom-origin-description", "Managed by pivot tool")
 
 	// Kill our dummy container
 	podmanRemove(types.PivotName)

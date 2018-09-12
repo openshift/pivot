@@ -26,20 +26,22 @@ type ImageInspection struct {
 	Layers        []string
 }
 
+// RpmOstreeState houses zero or more deployments
 // Subset of `rpm-ostree status --json`
 // https://github.com/projectatomic/rpm-ostree/blob/bce966a9812df141d38e3290f845171ec745aa4e/src/daemon/rpmostreed-deployment-utils.c#L227
 type RpmOstreeState struct {
-	Deployments   []RpmOstreeDeployment
+	Deployments []RpmOstreeDeployment
 }
 
+// RpmOstreeDeployment abstracts a specific rpm-ostree deployment
 type RpmOstreeDeployment struct {
-	Id            string    `json:"id"`
-	OSName        string    `json:"osname"`
-	Serial        int32     `json:"serial"`
-	Checksum      string    `json:"checksum"`
-	Version       string    `json:"version"`
-	Timestamp     uint64    `json:"timestamp"`
-	Booted        bool      `json:"booted"`
-	Origin        string    `json:"origin"`
-	CustomOrigin  []string  `json:"custom-origin"`
+	ID           string   `json:"id"`
+	OSName       string   `json:"osname"`
+	Serial       int32    `json:"serial"`
+	Checksum     string   `json:"checksum"`
+	Version      string   `json:"version"`
+	Timestamp    uint64   `json:"timestamp"`
+	Booted       bool     `json:"booted"`
+	Origin       string   `json:"origin"`
+	CustomOrigin []string `json:"custom-origin"`
 }
