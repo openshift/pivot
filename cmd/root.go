@@ -9,9 +9,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/ashcrow/pivot/types"
-	"github.com/ashcrow/pivot/utils"
 	"github.com/golang/glog"
+	"github.com/openshift/pivot/types"
+	"github.com/openshift/pivot/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

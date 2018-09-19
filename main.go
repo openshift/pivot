@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/openshift/pivot/cmd"
 	"github.com/spf13/pflag"
-
-	// TODO: update to official location
-	"github.com/ashcrow/pivot/cmd"
 )
 
 // The following are passed in at build time

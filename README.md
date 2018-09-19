@@ -1,6 +1,6 @@
 pivot ➰
 ========
-[![Build Status](https://travis-ci.org/ashcrow/pivot.svg)](https://travis-ci.org/ashcrow/pivot/)
+[![Build Status](https://travis-ci.org/openshift/pivot.svg)](https://travis-ci.org/openshift/pivot/)
 
 `pivot` provides a simple command allowing you to upgrade an
 OSTree-based system from an OSTree repo embedded within a container

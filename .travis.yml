@@ -15,8 +15,8 @@ notifications:
 
 # Required since the clone will not always be tested from inside the same namespace
 before_script:
-  - mkdir -p $HOME/gopath/src/github.com/ashcrow/pivot/
-  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/ashcrow/pivot/
+  - mkdir -p $HOME/gopath/src/github.com/openshift/pivot/
+  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/openshift/pivot/
 
 script:
   - make lint
