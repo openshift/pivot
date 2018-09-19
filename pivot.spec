@@ -6,8 +6,8 @@ Release:        0.1%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
 License:        ASL 2.0
-URL:            https://github.com/ashcrow/pivot
-Source0:        https://github.com/ashcrow/%{name}/archive/v%{version}.tar.gz
+URL:            https://github.com/openshift/pivot
+Source0:        https://github.com/openshift/%{name}/archive/v%{version}.tar.gz
 
 
 
@@ -20,18 +20,18 @@ deployment to another with minimal effort.
 
 %prep
 %autosetup -n %{name}-%{version}
-mkdir -p src/github.com/ashcrow/%{name}/
-cp -rf cmd  Gopkg.lock  Gopkg.toml  LICENSE  main.go  Makefile  pivot.spec  README.md  types  utils vendor VERSION src/github.com/ashcrow/%{name}
+mkdir -p src/github.com/openshift/%{name}/
+cp -rf cmd  Gopkg.lock  Gopkg.toml  LICENSE  main.go  Makefile  pivot.spec  README.md  types  utils vendor VERSION src/github.com/openshift/%{name}
 
 %build
 export GOPATH=`pwd`
-cd src/github.com/ashcrow/%{name}/
+cd src/github.com/openshift/%{name}/
 make build
 
 %install
 ls -la
 install -d %{buildroot}%{_bindir}
-install --mode 755 src/github.com/ashcrow/%{name}/%{name} %{buildroot}%{_bindir}/%{name}
+install --mode 755 src/github.com/openshift/%{name}/%{name} %{buildroot}%{_bindir}/%{name}
 
 %files
 %license LICENSE
