@@ -20,6 +20,7 @@ import (
 var keep bool
 var reboot bool
 var container string
+var exit_77 bool
 
 // RootCmd houses the cobra config for the main command
 var RootCmd = &cobra.Command{
@@ -39,6 +40,7 @@ var RootCmd = &cobra.Command{
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&keep, "keep", "k", false, "Do not remove container image")
 	RootCmd.PersistentFlags().BoolVarP(&reboot, "reboot", "r", false, "Reboot if changed")
+	RootCmd.PersistentFlags().BoolVar(&exit_77, "unchanged-exit-77", false, "If unchanged, exit 77")
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 }
 
@@ -87,6 +89,9 @@ func Execute(cmd *cobra.Command, args []string) {
 
 	if previousPivot == imgid {
 		glog.Info("Already at target pivot; exiting...\n")
+		if (exit_77) {
+			os.Exit(77)
+		}
 		return
 	}
 
