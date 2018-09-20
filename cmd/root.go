@@ -38,7 +38,7 @@ var RootCmd = &cobra.Command{
 // Executes upon import
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&keep, "keep", "k", false, "Do not remove container image")
-	RootCmd.PersistentFlags().BoolVarP(&reboot, "reboot", "r", false, "reboot if changed")
+	RootCmd.PersistentFlags().BoolVarP(&reboot, "reboot", "r", false, "Reboot if changed")
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 }
 
