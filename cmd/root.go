@@ -102,9 +102,8 @@ func Execute(cmd *cobra.Command, args []string) {
 	// Clean up a previous container
 	podmanRemove(types.PivotName)
 
-	// `podman mount` wants a running container, so let's make a dummy one
-	cid := utils.RunGetOutln("podman", "run", "-d", "--net=none", "--name",
-		types.PivotName, "--entrypoint", "sleep", imgid, "infinity")
+	// `podman mount` wants a container, so let's make create a dummy one, but not run it
+	cid := utils.RunGetOutln("podman", "create", "--net=none", "--name", types.PivotName, imgid)
 	// Use the container ID to find its mount point
 	mnt := utils.RunGetOutln("podman", "mount", cid)
 	os.Chdir(mnt)
