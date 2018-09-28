@@ -76,7 +76,7 @@ func Execute(cmd *cobra.Command, args []string) {
 	if len(defaultDeployment.CustomOrigin) > 0 {
 		if strings.HasPrefix(defaultDeployment.CustomOrigin[0], "pivot://") {
 			previousPivot = defaultDeployment.CustomOrigin[0][len("pivot://"):]
-			glog.Infof("Previous pivot: %s\n", previousPivot)
+			glog.Infof("Previous pivot: %s", previousPivot)
 		}
 	}
 
@@ -86,9 +86,10 @@ func Execute(cmd *cobra.Command, args []string) {
 	var imagedata types.ImageInspection
 	json.Unmarshal([]byte(output), &imagedata)
 	imgid := fmt.Sprintf("%s@%s", imagedata.Name, imagedata.Digest)
+	glog.Infof("Resolved to: %s", imgid)
 
 	if previousPivot == imgid {
-		glog.Info("Already at target pivot; exiting...\n")
+		glog.Info("Already at target pivot; exiting...")
 		if (exit_77) {
 			os.Exit(77)
 		}
@@ -103,7 +104,11 @@ func Execute(cmd *cobra.Command, args []string) {
 
 	// Pull the image
 	utils.Run("podman", "pull", imgid)
-	glog.Infof("Pivoting to: %s\n", imgid)
+	if ostree_version, ok := imagedata.Labels["io.openshift.os-version"]; ok {
+		glog.Infof("Pivoting to: %s (%s)", ostree_version, ostree_csum)
+	} else {
+		glog.Infof("Pivoting to: %s", ostree_csum)
+	}
 
 	// Clean up a previous container
 	podmanRemove(types.PivotName)
