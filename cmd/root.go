@@ -95,6 +95,12 @@ func Execute(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	// Make sure it has a commit label before pulling
+	ostree_csum, ok := imagedata.Labels["io.openshift.os-commit"]
+	if !ok {
+		glog.Fatal("No io.openshift.os-commit label found in metadata!")
+	}
+
 	// Pull the image
 	utils.Run("podman", "pull", imgid)
 	glog.Infof("Pivoting to: %s\n", imgid)
@@ -108,28 +114,16 @@ func Execute(cmd *cobra.Command, args []string) {
 	mnt := utils.RunGetOutln("podman", "mount", cid)
 	os.Chdir(mnt)
 
-	// List all refs from the OSTree repository embedded in the container
-	refsCombined := utils.RunGetOut("ostree", "--repo=srv/repo", "refs")
-	refs := strings.Split(strings.TrimSpace(refsCombined), "\n")
-	rlen := len(refs)
-	// Today, we only support one ref.  Down the line we may do multiple.
-	if rlen != 1 {
-		glog.Fatalf("Found %d refs, expected exactly 1", rlen)
-	}
-	targetRef := refs[0]
-	// Find the concrete OSTree commit
-	rev := utils.RunGetOutln("ostree", "--repo=srv/repo", "rev-parse", targetRef)
-
 	// Use pull-local to extract the data into the system repo; this is *significantly*
 	// faster than talking to the container over HTTP.
-	utils.Run("ostree", "pull-local", "srv/repo", rev)
+	utils.Run("ostree", "pull-local", "srv/repo", ostree_csum)
 
 	// This will be what will be displayed in `rpm-ostree status` as the "origin spec"
 	customURL := fmt.Sprintf("pivot://%s", imgid)
 
 	// The leading ':' here means "no remote".  See also
 	// https://github.com/projectatomic/rpm-ostree/pull/1396
-	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", rev),
+	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", ostree_csum),
 		"--custom-origin-url", customURL,
 		"--custom-origin-description", "Managed by pivot tool")
 
