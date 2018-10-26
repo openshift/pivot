@@ -99,7 +99,10 @@ func Execute(cmd *cobra.Command, args []string) {
 	// Make sure it has a commit label before pulling
 	ostree_csum, ok := imagedata.Labels["io.openshift.os-commit"]
 	if !ok {
-		glog.Fatal("No io.openshift.os-commit label found in metadata!")
+		ostree_csum, ok = imagedata.Labels["com.coreos.ostree-commit"]
+		if !ok {
+			glog.Fatal("No com.coreos.os-commit label found in metadata!")
+		}
 	}
 
 	// Pull the image
