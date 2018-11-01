@@ -97,17 +97,14 @@ func Execute(cmd *cobra.Command, args []string) {
 	}
 
 	// Make sure it has a commit label before pulling
-	ostree_csum, ok := imagedata.Labels["io.openshift.os-commit"]
+	ostree_csum, ok := imagedata.Labels["com.coreos.ostree-commit"]
 	if !ok {
-		ostree_csum, ok = imagedata.Labels["com.coreos.ostree-commit"]
-		if !ok {
-			glog.Fatal("No com.coreos.os-commit label found in metadata!")
-		}
+		glog.Fatal("No com.coreos.ostree-commit label found in metadata!")
 	}
 
 	// Pull the image
 	utils.Run("podman", "pull", imgid)
-	if ostree_version, ok := imagedata.Labels["io.openshift.os-version"]; ok {
+	if ostree_version, ok := imagedata.Labels["version"]; ok {
 		glog.Infof("Pivoting to: %s (%s)", ostree_version, ostree_csum)
 	} else {
 		glog.Infof("Pivoting to: %s", ostree_csum)
