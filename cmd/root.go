@@ -102,13 +102,14 @@ func Execute(cmd *cobra.Command, args []string) {
 		glog.Fatal("No com.coreos.ostree-commit label found in metadata!")
 	}
 
-	// Pull the image
-	utils.Run("podman", "pull", imgid)
 	if ostree_version, ok := imagedata.Labels["version"]; ok {
 		glog.Infof("Pivoting to: %s (%s)", ostree_version, ostree_csum)
 	} else {
 		glog.Infof("Pivoting to: %s", ostree_csum)
 	}
+
+	// Pull the image
+	utils.Run("podman", "pull", imgid)
 
 	// Clean up a previous container
 	podmanRemove(types.PivotName)
