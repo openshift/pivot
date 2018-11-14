@@ -2,7 +2,6 @@ VERSION := $(shell cat ./VERSION)
 COMMIT_HASH := $(shell git rev-parse HEAD 2>/dev/null || true)
 BUILD_TIME := $(shell date +%s)
 DEFAULT_TEMPLATE := /etc/image-helpgen/template.tpl
-
 # Used during all builds
 LDFLAGS := -X main.version=${VERSION} -X main.commitHash=${COMMIT_HASH} -X main.buildTime=${BUILD_TIME}
 
@@ -20,6 +19,7 @@ help:
 	@echo " - install: Install build results to the system"
 	@echo " - lint: Run golint"
 	@echo " - test: Run unittests"
+	@echo " - changelog: Returns the changes from the last tag up till HEAD"
 	@echo ""
 	@echo "Variables:"
 	@echo " - PREFIX: The root location to install. This prepends to all *_DIR variables. Set to: ${PREFIX}"
@@ -27,6 +27,9 @@ help:
 	@echo " - VERSION: Generally not overridden. The output of the VERSION file. Set to: ${VERSION}"
 	@echo " - COMMIT_HASH: Generally not overridden. The git hash the code was built from. Set to: ${COMMIT_HASH}"
 	@echo " - BUILD_TIME: Generally not overridden. The unix time of the build. Set to: ${BUILD_TIME}"
+
+changelog:
+	git log --format="- %s" `git tag | tail -n 1`..HEAD
 
 build: clean
 	go build -ldflags '${LDFLAGS}' -o pivot main.go

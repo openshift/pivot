@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 Name:           pivot
-Version:        0.0.1
+Version:        0.0.2
 Release:        0.1%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
@@ -40,6 +40,36 @@ install --mode 755 src/github.com/openshift/%{name}/%{name} %{buildroot}%{_bindi
 
 
 %changelog
+* Wed Nov 14 2018 Steve Milner <smilner@redhat.com> - 0.0.2-0.1
+- Makefile: Add changelog target
+- cmd/root: Print pivoting msg before pull
+- cmd/root: Only support the latest labels
+- Support com.coreos.ostree-commit too
+- cmd/root: Make OSTree version we pivot to more prominent
+- cmd/root: Don't rely on refs, use checksum from label
+- cmd: only create, don't run the container
+- cmd: add --unchanged-exit-77
+- cmd: fix capitalization
+- Namespace move from ashcrow to openshift
+- README.md: update with more information
+- cmd: drop networking in the container
+- gofmt: Update formatting
+- cmd: ask rpm-ostree for state instead of marker file
+- cmd: implement full idempotency
+- types: use permalink to skopeo spec
+- utils: use glog.Infof for consistency
+- cmd: add the default cmdline flags
+- cmd: drop --touch-if-changed
+- Use pivot:// prefix for rpm-ostree custom URL
+- Pass custom origin information to rpm-ostree
+- Canonicalize to name@digest
+- Merge pull request #10 from ashcrow/misc-enhancements
+- utils: Add basic unittests
+- main.go: Generate header from build info
+- .travis.yml: Switch to 1.1[0,1].x golang versions
+- .gitignore: Ignore .vscode
+
+
 * Thu Aug  9 2018 Steve Milner <smilner@redhat.com> - 0.0.1-0.1
 - Multiple fixes
 
