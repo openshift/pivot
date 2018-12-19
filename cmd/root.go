@@ -133,6 +133,11 @@ func Execute(cmd *cobra.Command, args []string) {
 		"--custom-origin-url", customURL,
 		"--custom-origin-description", "Managed by pivot tool")
 
+	// We do this here to take that cost upfront and potentially fail on any
+	// errors right away instead of having the MCD figure it out on its own
+	// after the reboot.
+	utils.Run("ostree", "admin", "finalize-staged")
+
 	// Kill our dummy container
 	podmanRemove(types.PivotName)
 
