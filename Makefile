@@ -5,8 +5,9 @@ DEFAULT_TEMPLATE := /etc/image-helpgen/template.tpl
 # Used during all builds
 LDFLAGS := -X main.version=${VERSION} -X main.commitHash=${COMMIT_HASH} -X main.buildTime=${BUILD_TIME}
 
+PREFIX ?= /usr
 CONFIG_DIR ?= /etc
-BIN_DIR ?= /usr/bin
+BIN_DIR ?= ${PREFIX}/bin
 
 .PHONY: help build clean deps install lint static test
 
@@ -46,8 +47,8 @@ deps:
 	dep ensure -v
 
 install: clean build
-	install -d ${PREFIX}${BIN_DIR}
-	install --mode 755 pivot ${PREFIX}${BIN_DIR}/pivot
+	install -d ${DESTDIR}${BIN_DIR}
+	install --mode 755 pivot ${DESTDIR}${BIN_DIR}/pivot
 
 lint:
 	go get -u github.com/golang/lint/golint

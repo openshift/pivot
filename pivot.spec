@@ -29,9 +29,8 @@ cd src/github.com/openshift/%{name}/
 make build
 
 %install
-ls -la
-install -d %{buildroot}%{_bindir}
-install --mode 755 src/github.com/openshift/%{name}/%{name} %{buildroot}%{_bindir}/%{name}
+cd src/github.com/openshift/%{name}/
+make install DESTDIR=%{buildroot}
 
 %files
 %license LICENSE
