@@ -24,7 +24,8 @@ var exit_77 bool
 
 // RootCmd houses the cobra config for the main command
 var RootCmd = &cobra.Command{
-	Use:   "pivot",
+	Use:   "pivot [FLAGS] <IMAGE_PULLSPEC>",
+	DisableFlagsInUseLine: true,
 	Short: "Allows moving from one OSTree deployment to another",
 	//	Long: ``,
 	Args: func(cmd *cobra.Command, args []string) error {
