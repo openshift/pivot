@@ -22,6 +22,9 @@ var reboot bool
 var container string
 var exit_77 bool
 
+// the number of times to retry commands that pull data from the network
+const numRetriesNetCommands = 5
+
 // RootCmd houses the cobra config for the main command
 var RootCmd = &cobra.Command{
 	Use:   "pivot [FLAGS] <IMAGE_PULLSPEC>",
@@ -82,7 +85,7 @@ func Execute(cmd *cobra.Command, args []string) {
 	}
 
 	// Use skopeo to canonicalize to $name@$digest, so we can refer to it reliably
-	output := utils.RunGetOut("skopeo", "inspect", fmt.Sprintf("docker://%s", container))
+	output := utils.RunExt(true, numRetriesNetCommands, "skopeo", "inspect", fmt.Sprintf("docker://%s", container))
 
 	var imagedata types.ImageInspection
 	json.Unmarshal([]byte(output), &imagedata)
@@ -110,7 +113,7 @@ func Execute(cmd *cobra.Command, args []string) {
 	}
 
 	// Pull the image
-	utils.Run("podman", "pull", imgid)
+	utils.RunExt(false, numRetriesNetCommands, "podman", "pull", imgid)
 
 	// Clean up a previous container
 	podmanRemove(types.PivotName)
