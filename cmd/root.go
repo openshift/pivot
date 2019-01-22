@@ -116,9 +116,9 @@ func Execute(cmd *cobra.Command, args []string) {
 	podmanRemove(types.PivotName)
 
 	// `podman mount` wants a container, so let's make create a dummy one, but not run it
-	cid := utils.RunGetOutln("podman", "create", "--net=none", "--name", types.PivotName, imgid)
+	cid := utils.RunGetOut("podman", "create", "--net=none", "--name", types.PivotName, imgid)
 	// Use the container ID to find its mount point
-	mnt := utils.RunGetOutln("podman", "mount", cid)
+	mnt := utils.RunGetOut("podman", "mount", cid)
 	os.Chdir(mnt)
 
 	// Use pull-local to extract the data into the system repo; this is *significantly*
