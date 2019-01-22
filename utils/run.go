@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"strings"
@@ -8,35 +9,41 @@ import (
 	"github.com/golang/glog"
 )
 
+func runImpl(capture bool, command string, args ...string) ([]byte, error) {
+	glog.Infof("Running: %s %s\n", command, strings.Join(args, " "))
+	cmd := exec.Command(command, args...)
+	cmd.Stderr = os.Stderr
+	var stdout bytes.Buffer
+	if !capture {
+		cmd.Stdout = os.Stdout
+	} else {
+		cmd.Stdout = &stdout
+	}
+	err := cmd.Run()
+	if err != nil {
+		return nil, err
+	}
+	if capture {
+		return stdout.Bytes(), nil
+	}
+	return []byte{}, nil
+}
+
 // Execute a command, logging it, and exit with a fatal error if
 // the command failed.
 func Run(command string, args ...string) {
-	glog.Infof("Running: %s %s\n", command, strings.Join(args, " "))
-	cmd := exec.Command(command, args...)
-	// Pass through by default
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
+	if _, err := runImpl(false, command, args...); err != nil {
 		glog.Fatalf("%s: %s", command, err)
 	}
 }
 
 // Like Run(), but get the output as a string
 func RunGetOut(command string, args ...string) string {
-	glog.Infof("Running: %s %s\n", command, strings.Join(args, " "))
-	cmd := exec.Command(command, args...)
-	// Pass through by default
-	cmd.Stderr = os.Stderr
-	rawOut, err := cmd.Output()
-	if err != nil {
+	var err error
+	var out []byte
+	if out, err = runImpl(true, command, args...); err != nil {
 		glog.Fatalf("%s: %s", command, err)
 	}
-	return string(rawOut)
+	return strings.TrimSpace(string(out))
 }
 
-// Run executes a command on the local system and returns the output
-// in string format
-func RunGetOutln(command string, args ...string) string {
-	return strings.TrimSpace(RunGetOut(command, args...))
-}
