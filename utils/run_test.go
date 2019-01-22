@@ -17,3 +17,16 @@ func TestRunGetOut(t *testing.T) {
 		t.Errorf("expected 'hello world', got '%s'", result)
 	}
 }
+
+// TestRunExt verifies that the wait machinery works, even though we're only
+// just testing a single step here since it's tricky to test retries.
+func TestRunExt(t *testing.T) {
+	RunExt(false, 0, "echo", "echo", "from", "TestRunExt")
+
+	if result := RunExt(true, 0, "echo", "hello", "world"); result != "hello world" {
+		t.Errorf("expected 'hello world', got '%s'", result)
+	}
+
+	Run("echo", "This may take a while and then fail if you're really unlucky...")
+	RunExt(false, 5, "sh", "-c", "[ $(($RANDOM % 100)) -lt 50 ]")
+}
