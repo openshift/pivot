@@ -32,9 +32,11 @@ help:
 changelog:
 	git log --format="- %s" `git tag | tail -n 1`..HEAD
 
-build: clean
+pivot: Gopkg.* *.go cmd/*.go utils/*.go types/*.go
 	go build -ldflags '${LDFLAGS}' -o pivot main.go
 	strip pivot
+
+build: pivot
 
 static: clean
 	CGO_ENABLED=0 go build -ldflags '${LDFLAGS} -w -extldflags "-static"' -a -o pivot main.go
@@ -46,7 +48,7 @@ deps:
 	go get -u github.com/golang/dep/cmd/dep
 	dep ensure -v
 
-install: clean build
+install: build
 	install -d ${DESTDIR}${BIN_DIR}
 	install --mode 755 pivot ${DESTDIR}${BIN_DIR}/pivot
 
