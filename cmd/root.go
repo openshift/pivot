@@ -146,7 +146,8 @@ func Execute(cmd *cobra.Command, args []string) {
 
 	// By default, delete the image.
 	if !keep {
-		utils.Run("podman", "rmi", imgid)
+		// Related: https://github.com/containers/libpod/issues/2234
+		utils.RunIgnoreErr("podman", "rmi", imgid)
 	}
 
 	if !changed {
