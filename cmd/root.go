@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/golang/glog"
@@ -50,8 +49,8 @@ func init() {
 
 // podmanRemove kills and removes a container
 func podmanRemove(cid string) {
-	exec.Command("podman", "kill", cid).Run()
-	exec.Command("podman", "rm", "-f", cid).Run()
+	utils.RunIgnoreErr("podman", "kill", cid)
+	utils.RunIgnoreErr("podman", "rm", "-f", cid)
 }
 
 // getDefaultDeployment uses rpm-ostree status --json to get the current deployment
