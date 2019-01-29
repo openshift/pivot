@@ -62,6 +62,12 @@ func Run(command string, args ...string) {
 	}
 }
 
+func RunIgnoreErr(command string, args ...string) {
+	if _, err := runImpl(false, command, args...); err != nil {
+		glog.Warningf("(ignored) %s: %s", command, err)
+	}
+}
+
 // Like Run(), but get the output as a string
 func RunGetOut(command string, args ...string) string {
 	var err error
