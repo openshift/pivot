@@ -70,9 +70,8 @@ func getDefaultDeployment() types.RpmOstreeDeployment {
 	return rosState.Deployments[0]
 }
 
-// Execute runs the command
-func Execute(cmd *cobra.Command, args []string) {
-	container := args[0]
+// Potentially rebases system if not already rebased.
+func pullAndRebase(container string) (imgid string, changed bool) {
 	defaultDeployment := getDefaultDeployment()
 
 	previousPivot := ""
@@ -88,14 +87,11 @@ func Execute(cmd *cobra.Command, args []string) {
 
 	var imagedata types.ImageInspection
 	json.Unmarshal([]byte(output), &imagedata)
-	imgid := fmt.Sprintf("%s@%s", imagedata.Name, imagedata.Digest)
+	imgid = fmt.Sprintf("%s@%s", imagedata.Name, imagedata.Digest)
 	glog.Infof("Resolved to: %s", imgid)
 
 	if previousPivot == imgid {
-		glog.Info("Already at target pivot; exiting...")
-		if (exit_77) {
-			os.Exit(77)
-		}
+		changed = false
 		return
 	}
 
@@ -139,13 +135,27 @@ func Execute(cmd *cobra.Command, args []string) {
 	// Kill our dummy container
 	podmanRemove(types.PivotName)
 
+	changed = true
+	return
+}
+
+// Execute runs the command
+func Execute(cmd *cobra.Command, args []string) {
+	container := args[0]
+	imgid, changed := pullAndRebase(container)
+
 	// By default, delete the image.
 	if !keep {
 		utils.Run("podman", "rmi", imgid)
 	}
 
+	if !changed {
+		glog.Info("Already at target pivot; exiting...")
+		if (exit_77) {
+			os.Exit(77)
+		}
 	// Reboot the machine if asked to do so
-	if reboot {
+	} else if reboot {
 		utils.Run("systemctl", "reboot")
 	}
 }
