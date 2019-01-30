@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -21,22 +21,20 @@ var reboot bool
 var container string
 var exit_77 bool
 
-// the number of times to retry commands that pull data from the network
-const numRetriesNetCommands = 5
+const (
+	// the number of times to retry commands that pull data from the network
+	numRetriesNetCommands = 5
+	etcPivotFile          = "/etc/pivot/image-pullspec"
+	runPivotRebootFile    = "/run/pivot/reboot-needed"
+)
 
 // RootCmd houses the cobra config for the main command
 var RootCmd = &cobra.Command{
-	Use: "pivot [FLAGS] <IMAGE_PULLSPEC>",
+	Use: "pivot [FLAGS] [IMAGE_PULLSPEC]",
 	DisableFlagsInUseLine: true,
 	Short: "Allows moving from one OSTree deployment to another",
-	//	Long: ``,
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("An image name must be provided")
-		}
-		return nil
-	},
-	Run: Execute,
+	Args:  cobra.MaximumNArgs(1),
+	Run:   Execute,
 }
 
 // init executes upon import
@@ -150,8 +148,31 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 
 // Execute runs the command
 func Execute(cmd *cobra.Command, args []string) {
-	container := args[0]
+	var fromFile bool
+	var container string
+	if len(args) > 0 {
+		container = args[0]
+		fromFile = false
+	} else {
+		glog.Infof("Using image pullspec from %s", etcPivotFile)
+		data, err := ioutil.ReadFile(etcPivotFile)
+		if err != nil {
+			glog.Fatalf("Failed to read from %s: %v", etcPivotFile, err)
+		}
+		container = strings.TrimSpace(string(data))
+		fromFile = true
+	}
+
 	imgid, changed := pullAndRebase(container)
+
+	// Delete the file now that we successfully rebased
+	if fromFile {
+		if err := os.Remove(etcPivotFile); err != nil {
+			if !os.IsNotExist(err) {
+				glog.Fatal("Failed to delete %s: %v", etcPivotFile, err)
+			}
+		}
+	}
 
 	// By default, delete the image.
 	if !keep {
@@ -164,7 +185,7 @@ func Execute(cmd *cobra.Command, args []string) {
 		if exit_77 {
 			os.Exit(77)
 		}
-	} else if reboot {
+	} else if reboot || utils.FileExists(runPivotRebootFile) {
 		// Reboot the machine if asked to do so
 		utils.Run("systemctl", "reboot")
 	}

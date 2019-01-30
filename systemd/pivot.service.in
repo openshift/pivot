@@ -1,0 +1,12 @@
+[Unit]
+Description=Pivot Tool
+ConditionPathExists=/etc/pivot/image-pullspec
+After=ignition-firstboot-complete.service
+Before=kubelet.service
+
+[Service]
+Type=simple
+ExecStart=@@PIVOT_BINARY_PATH@@
+
+[Install]
+WantedBy=multi-user.target

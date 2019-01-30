@@ -13,3 +13,5 @@ pivot
 *.out
 # editor
 .vscode
+
+systemd/pivot.service
