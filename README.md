@@ -37,6 +37,19 @@ Though normally, one wants to use digests rather than tags, e.g.:
 pivot -r $REGISTRY/os@sha256:fdf70521df4ed1dc135d81fd3c4608574aeca45dc22d1b4e38d16630e9d6f1a7
 ```
 
+It also comes with a systemd unit to provide a "host API". For example:
+
+```
+mkdir -p /etc/pivot
+echo $REGISTRY/os:latest > /etc/pivot/image-pullspec
+touch /run/pivot-reboot-needed
+systemctl start pivot
+```
+
+This will start `pivot`, which will read the file and execute the pivot.
+If the pivot is completed, the file will be deleted. The expected way to
+make use of this is to create the necessary files from Ignition.
+
 See
 ---
 - [openshift/os](https://github.com/openshift/os/)

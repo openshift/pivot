@@ -8,6 +8,7 @@ LDFLAGS := -X main.version=${VERSION} -X main.commitHash=${COMMIT_HASH} -X main.
 PREFIX ?= /usr
 CONFIG_DIR ?= /etc
 BIN_DIR ?= ${PREFIX}/bin
+SYSTEMD_UNIT_DIR ?= ${PREFIX}/lib/systemd/system
 
 .PHONY: help build clean deps install lint static test
 
@@ -32,11 +33,14 @@ help:
 changelog:
 	git log --format="- %s" `git tag | tail -n 1`..HEAD
 
+systemd/pivot.service: systemd/pivot.service.in
+	sed "s,@@PIVOT_BINARY_PATH@@,${BIN_DIR}/pivot,g" < systemd/pivot.service.in > systemd/pivot.service
+
 pivot: Gopkg.* *.go cmd/*.go utils/*.go types/*.go
 	go build -ldflags '${LDFLAGS}' -o pivot main.go
 	strip pivot
 
-build: pivot
+build: pivot systemd/pivot.service
 
 static: clean
 	CGO_ENABLED=0 go build -ldflags '${LDFLAGS} -w -extldflags "-static"' -a -o pivot main.go
@@ -51,6 +55,8 @@ deps:
 install: build
 	install -d ${DESTDIR}${BIN_DIR}
 	install --mode 755 pivot ${DESTDIR}${BIN_DIR}/pivot
+	install -d ${DESTDIR}${SYSTEMD_UNIT_DIR}
+	install --mode 664 systemd/pivot.service ${DESTDIR}${SYSTEMD_UNIT_DIR}
 
 lint:
 	go get -u github.com/golang/lint/golint

@@ -1,8 +1,8 @@
 %define debug_package %{nil}
 
 Name:           pivot
-Version:        0.0.2
-Release:        0.1%{?dist}
+Version:        0.0.3
+Release:        1%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
 License:        ASL 2.0
@@ -21,7 +21,7 @@ deployment to another with minimal effort.
 %prep
 %autosetup -n %{name}-%{version}
 mkdir -p src/github.com/openshift/%{name}/
-cp -rf cmd  Gopkg.lock  Gopkg.toml  LICENSE  main.go  Makefile  pivot.spec  README.md  types  utils vendor VERSION src/github.com/openshift/%{name}
+cp -rf cmd  Gopkg.lock  Gopkg.toml  LICENSE  main.go  Makefile  pivot.spec  README.md  types  utils vendor VERSION systemd src/github.com/openshift/%{name}
 
 %build
 export GOPATH=`pwd`
@@ -36,9 +36,12 @@ make install DESTDIR=%{buildroot}
 %license LICENSE
 %doc README.md
 %{_bindir}/%{name}
-
+%{_prefix}/lib/systemd/system/pivot.*
 
 %changelog
+* Tue Feb 05 2019 Jonathan Lebon <jlebon@redhat.com> - 0.0.3-1
+- Add systemd service unit
+
 * Wed Nov 14 2018 Steve Milner <smilner@redhat.com> - 0.0.2-0.1
 - Makefile: Add changelog target
 - cmd/root: Print pivoting msg before pull
