@@ -95,18 +95,6 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 		return
 	}
 
-	// Make sure it has a commit label before pulling
-	ostree_csum, ok := imagedata.Labels["com.coreos.ostree-commit"]
-	if !ok {
-		glog.Fatal("No com.coreos.ostree-commit label found in metadata!")
-	}
-
-	if ostree_version, ok := imagedata.Labels["version"]; ok {
-		glog.Infof("Pivoting to: %s (%s)", ostree_version, ostree_csum)
-	} else {
-		glog.Infof("Pivoting to: %s", ostree_csum)
-	}
-
 	// Pull the image
 	utils.RunExt(false, numRetriesNetCommands, "podman", "pull", imgid)
 
@@ -118,6 +106,30 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 	// Use the container ID to find its mount point
 	mnt := utils.RunGetOut("podman", "mount", cid)
 	os.Chdir(mnt)
+
+	// Now we need to figure out the commit to rebase to
+
+	// Commit label takes priority
+	ostree_csum, ok := imagedata.Labels["com.coreos.ostree-commit"]
+	if ok {
+		if ostree_version, ok := imagedata.Labels["version"]; ok {
+			glog.Infof("Pivoting to: %s (%s)", ostree_version, ostree_csum)
+		} else {
+			glog.Infof("Pivoting to: %s", ostree_csum)
+		}
+	} else {
+		glog.Infof("No com.coreos.ostree-commit label found in metadata! Inspecting...")
+		refs := strings.Split(utils.RunGetOut("ostree", "refs", "--repo=srv/repo"), "\n")
+		if len(refs) == 1 {
+			glog.Infof("Using ref %s", refs[0])
+			ostree_csum = utils.RunGetOut("ostree", "rev-parse", "--repo=srv/repo", refs[0])
+		} else if len(refs) > 1 {
+			glog.Fatalf("Multiple refs found in repo!")
+		} else {
+			// XXX: in the future, possibly scan the repo to find a unique .commit object
+			glog.Fatalf("No refs found in repo!")
+		}
+	}
 
 	// Use pull-local to extract the data into the system repo; this is *significantly*
 	// faster than talking to the container over HTTP.
