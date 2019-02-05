@@ -131,16 +131,13 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 		}
 	}
 
-	// Use pull-local to extract the data into the system repo; this is *significantly*
-	// faster than talking to the container over HTTP.
-	utils.Run("ostree", "pull-local", repo, ostree_csum)
-
 	// This will be what will be displayed in `rpm-ostree status` as the "origin spec"
 	customURL := fmt.Sprintf("pivot://%s", imgid)
 
-	// The leading ':' here means "no remote".  See also
-	// https://github.com/projectatomic/rpm-ostree/pull/1396
-	utils.Run("rpm-ostree", "rebase", fmt.Sprintf(":%s", ostree_csum),
+	// RPM-OSTree can now directly slurp from the mounted container!
+	// https://github.com/projectatomic/rpm-ostree/pull/1732
+	utils.Run("rpm-ostree", "rebase", "--experimental",
+		fmt.Sprintf("%s:%s", repo, ostree_csum),
 		"--custom-origin-url", customURL,
 		"--custom-origin-description", "Managed by pivot tool")
 
