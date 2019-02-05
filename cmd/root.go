@@ -105,7 +105,7 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 	cid := utils.RunGetOut("podman", "create", "--net=none", "--name", types.PivotName, imgid)
 	// Use the container ID to find its mount point
 	mnt := utils.RunGetOut("podman", "mount", cid)
-	os.Chdir(mnt)
+	repo := fmt.Sprintf("%s/srv/repo", mnt)
 
 	// Now we need to figure out the commit to rebase to
 
@@ -119,10 +119,10 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 		}
 	} else {
 		glog.Infof("No com.coreos.ostree-commit label found in metadata! Inspecting...")
-		refs := strings.Split(utils.RunGetOut("ostree", "refs", "--repo=srv/repo"), "\n")
+		refs := strings.Split(utils.RunGetOut("ostree", "refs", "--repo", repo), "\n")
 		if len(refs) == 1 {
 			glog.Infof("Using ref %s", refs[0])
-			ostree_csum = utils.RunGetOut("ostree", "rev-parse", "--repo=srv/repo", refs[0])
+			ostree_csum = utils.RunGetOut("ostree", "rev-parse", "--repo", repo, refs[0])
 		} else if len(refs) > 1 {
 			glog.Fatalf("Multiple refs found in repo!")
 		} else {
@@ -133,7 +133,7 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 
 	// Use pull-local to extract the data into the system repo; this is *significantly*
 	// faster than talking to the container over HTTP.
-	utils.Run("ostree", "pull-local", "srv/repo", ostree_csum)
+	utils.Run("ostree", "pull-local", repo, ostree_csum)
 
 	// This will be what will be displayed in `rpm-ostree status` as the "origin spec"
 	customURL := fmt.Sprintf("pivot://%s", imgid)
