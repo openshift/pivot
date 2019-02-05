@@ -26,7 +26,7 @@ const numRetriesNetCommands = 5
 
 // RootCmd houses the cobra config for the main command
 var RootCmd = &cobra.Command{
-	Use:   "pivot [FLAGS] <IMAGE_PULLSPEC>",
+	Use: "pivot [FLAGS] <IMAGE_PULLSPEC>",
 	DisableFlagsInUseLine: true,
 	Short: "Allows moving from one OSTree deployment to another",
 	//	Long: ``,
@@ -39,7 +39,7 @@ var RootCmd = &cobra.Command{
 	Run: Execute,
 }
 
-// Executes upon import
+// init executes upon import
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&keep, "keep", "k", false, "Do not remove container image")
 	RootCmd.PersistentFlags().BoolVarP(&reboot, "reboot", "r", false, "Reboot if changed")
@@ -70,7 +70,7 @@ func getDefaultDeployment() types.RpmOstreeDeployment {
 	return rosState.Deployments[0]
 }
 
-// Potentially rebases system if not already rebased.
+// pullAndRebase potentially rebases system if not already rebased.
 func pullAndRebase(container string) (imgid string, changed bool) {
 	defaultDeployment := getDefaultDeployment()
 
@@ -161,11 +161,11 @@ func Execute(cmd *cobra.Command, args []string) {
 
 	if !changed {
 		glog.Info("Already at target pivot; exiting...")
-		if (exit_77) {
+		if exit_77 {
 			os.Exit(77)
 		}
-	// Reboot the machine if asked to do so
 	} else if reboot {
+		// Reboot the machine if asked to do so
 		utils.Run("systemctl", "reboot")
 	}
 }
