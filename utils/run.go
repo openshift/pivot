@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// runImpl is the actual shell execution implementation used by other functions.
 func runImpl(capture bool, command string, args ...string) ([]byte, error) {
 	glog.Infof("Running: %s %s\n", command, strings.Join(args, " "))
 	cmd := exec.Command(command, args...)
@@ -31,7 +32,7 @@ func runImpl(capture bool, command string, args ...string) ([]byte, error) {
 	return []byte{}, nil
 }
 
-// Execute a command, optionally capturing the output and retrying multiple
+// RunExt executes a command, optionally capturing the output and retrying multiple
 // times before exiting with a fatal error.
 func RunExt(capture bool, retries int, command string, args ...string) string {
 	var output string
@@ -54,7 +55,7 @@ func RunExt(capture bool, retries int, command string, args ...string) string {
 	return output
 }
 
-// Execute a command, logging it, and exit with a fatal error if
+// Run executes a command, logging it, and exit with a fatal error if
 // the command failed.
 func Run(command string, args ...string) {
 	if _, err := runImpl(false, command, args...); err != nil {
@@ -62,13 +63,14 @@ func Run(command string, args ...string) {
 	}
 }
 
+// RunIgnoreErr is like Run(..), but doesn't exit on errors
 func RunIgnoreErr(command string, args ...string) {
 	if _, err := runImpl(false, command, args...); err != nil {
 		glog.Warningf("(ignored) %s: %s", command, err)
 	}
 }
 
-// Like Run(), but get the output as a string
+// RunGetOut is like Run(..), but get the output as a string
 func RunGetOut(command string, args ...string) string {
 	var err error
 	var out []byte
@@ -77,4 +79,3 @@ func RunGetOut(command string, args ...string) string {
 	}
 	return strings.TrimSpace(string(out))
 }
-
