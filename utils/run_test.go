@@ -18,6 +18,14 @@ func TestRunGetOut(t *testing.T) {
 	}
 }
 
+// TestRunIgnoreErr verifies the a failed command doesn't cause exit
+func TestRunIgnoreErr(t *testing.T) {
+	// Should succeed and cause no exit
+	RunIgnoreErr("echo", "test")
+	// Should fail and cause no exit
+	RunIgnoreErr("acommandthatdoesNOTEXIST")
+}
+
 // TestRunExt verifies that the wait machinery works, even though we're only
 // just testing a single step here since it's tricky to test retries.
 func TestRunExt(t *testing.T) {
