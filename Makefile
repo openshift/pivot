@@ -64,4 +64,4 @@ lint:
 
 
 test:
-	go list ./... | grep -v vendor | xargs go test -v
+	go list ./... | grep -v vendor | xargs env GOCACHE=off go test -v
