@@ -42,7 +42,7 @@ It also comes with a systemd unit to provide a "host API". For example:
 ```
 mkdir -p /etc/pivot
 echo $REGISTRY/os:latest > /etc/pivot/image-pullspec
-touch /run/pivot-reboot-needed
+touch /run/pivot/reboot-needed
 systemctl start pivot
 ```
 
