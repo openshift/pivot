@@ -5,7 +5,8 @@ After=ignition-firstboot-complete.service
 Before=kubelet.service
 
 [Service]
-Type=simple
+# Need oneshot to delay kubelet
+Type=oneshot
 ExecStart=@@PIVOT_BINARY_PATH@@
 
 [Install]
