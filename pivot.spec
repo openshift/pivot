@@ -2,7 +2,7 @@
 
 Name:           pivot
 Version:        0.0.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
 License:        ASL 2.0
@@ -39,6 +39,10 @@ make install DESTDIR=%{buildroot}
 %{_prefix}/lib/systemd/system/pivot.*
 
 %changelog
+* Wed Feb 20 2019 Yu Qi Zhang <jerzhang@redhat.com> - 0.0.3-2
+- service: Use Type=oneshot
+- README.md updates
+
 * Tue Feb 05 2019 Jonathan Lebon <jlebon@redhat.com> - 0.0.3-1
 - Add systemd service unit
 
