@@ -26,6 +26,8 @@ const (
 	numRetriesNetCommands = 5
 	etcPivotFile          = "/etc/pivot/image-pullspec"
 	runPivotRebootFile    = "/run/pivot/reboot-needed"
+	// Pull secret.  Written by the machine-config-operator
+	kubeletAuthFile       = "/var/lib/kubelet/config.json"
 )
 
 // RootCmd houses the cobra config for the main command
@@ -80,8 +82,16 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 		}
 	}
 
+	var authArgs []string
+	if utils.FileExists(kubeletAuthFile) {
+		authArgs = append(authArgs, "--authfile", kubeletAuthFile)
+	}
+
 	// Use skopeo to canonicalize to $name@$digest, so we can refer to it reliably
-	output := utils.RunExt(true, numRetriesNetCommands, "skopeo", "inspect", fmt.Sprintf("docker://%s", container))
+	skopeoArgs := []string{"inspect"}
+	skopeoArgs = append(skopeoArgs, authArgs...)
+	skopeoArgs = append(skopeoArgs, fmt.Sprintf("docker://%s", container))
+	output := utils.RunExt(true, numRetriesNetCommands, "skopeo", skopeoArgs...)
 
 	var imagedata types.ImageInspection
 	json.Unmarshal([]byte(output), &imagedata)
@@ -94,7 +104,10 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 	}
 
 	// Pull the image
-	utils.RunExt(false, numRetriesNetCommands, "podman", "pull", imgid)
+	podmanArgs := []string{"pull"}
+	podmanArgs = append(podmanArgs, authArgs...)
+	podmanArgs = append(podmanArgs, imgid)
+	utils.RunExt(false, numRetriesNetCommands, "podman", podmanArgs...)
 
 	// Clean up a previous container
 	podmanRemove(types.PivotName)
