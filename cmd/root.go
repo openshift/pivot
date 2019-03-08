@@ -7,12 +7,16 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	// Enable sha256 in container image references
+	_ "crypto/sha256"
 
 	"github.com/golang/glog"
 	"github.com/openshift/pivot/types"
 	"github.com/openshift/pivot/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	imgref "github.com/containers/image/docker/reference"
 )
 
 // flag storage
@@ -70,6 +74,46 @@ func getDefaultDeployment() types.RpmOstreeDeployment {
 	return rosState.Deployments[0]
 }
 
+// getRefDigest parses a Docker/OCI image reference and returns
+// its digest, or an error if the string fails to parse as
+// a "canonical" image reference with a digest.
+func getRefDigest(ref string) (string, error) {
+	refParsed, err := imgref.ParseNamed(ref)
+	if err != nil {
+		return "", fmt.Errorf("parsing reference: %q: %v", ref, err)
+	}
+	canon, ok := refParsed.(imgref.Canonical)
+	if !ok {
+		return "", fmt.Errorf("not canonical form: %q: %v", ref, err)
+	}
+
+	return canon.Digest().String(), nil
+}
+
+// compareOSImageURL determines whether two images are the same, or have
+// matching digests.
+func compareOSImageURL(current, desired string) (bool, error) {
+	if current == desired {
+		return true, nil
+	}
+
+	currentDigest, err := getRefDigest(current)
+	if err != nil {
+		return false, fmt.Errorf("parsing current osImageURL: %v", err)
+	}
+	desiredDigest, err := getRefDigest(desired)
+	if err != nil {
+		return false, fmt.Errorf("parsing desired osImageURL: %v", err)
+	}
+
+	if currentDigest == desiredDigest {
+		glog.Infof("Current and target osImageURL have matching digest %q", currentDigest)
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // pullAndRebase potentially rebases system if not already rebased.
 func pullAndRebase(container string) (imgid string, changed bool) {
 	defaultDeployment := getDefaultDeployment()
@@ -98,7 +142,11 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 	imgid = fmt.Sprintf("%s@%s", imagedata.Name, imagedata.Digest)
 	glog.Infof("Resolved to: %s", imgid)
 
-	if previousPivot == imgid {
+	targetMatched, err := compareOSImageURL(previousPivot, imgid)
+	if err != nil {
+		glog.Fatalf("%v", err)
+	}
+	if targetMatched {
 		changed = false
 		return
 	}
