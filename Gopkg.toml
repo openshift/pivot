@@ -40,3 +40,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/golang/glog"
+
+[[constraint]]
+  name = "github.com/containers/image"
+  version = "1.5.0"
