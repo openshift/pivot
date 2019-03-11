@@ -1,8 +1,8 @@
 %define debug_package %{nil}
 
 Name:           pivot
-Version:        0.0.4
-Release:        3%{?dist}
+Version:        0.0.3
+Release:        4%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
 License:        ASL 2.0
