@@ -2,6 +2,11 @@ package utils
 
 import (
 	"testing"
+	"os"
+	"time"
+	"io/ioutil"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // TestRun should always pass. The function will panic if it is unable to
@@ -35,6 +40,21 @@ func TestRunExt(t *testing.T) {
 		t.Errorf("expected 'hello world', got '%s'", result)
 	}
 
-	Run("echo", "This may take a while and then fail if you're really unlucky...")
-	RunExt(false, 5, "sh", "-c", "[ $(($RANDOM % 100)) -lt 50 ]")
+	tmpdir, err := ioutil.TempDir("", "run_test")
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer os.RemoveAll(tmpdir)
+	tmpf := tmpdir + "/t"
+	runExtBackoff(false, wait.Backoff{Steps: 6,
+		Duration: 1 * time.Second,
+		Factor: 1.1},
+		"sh", "-c", "echo -n x >> " + tmpf + " && test $(stat -c '%s' " + tmpf + ") = 3")
+	s, err := os.Stat(tmpf)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	if s.Size() != 3 {
+		t.Fatalf("Expected size 3")
+	}
 }
