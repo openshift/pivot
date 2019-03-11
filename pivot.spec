@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 Name:           pivot
-Version:        0.0.3
+Version:        0.0.4
 Release:        3%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
@@ -39,6 +39,9 @@ make install DESTDIR=%{buildroot}
 %{_prefix}/lib/systemd/system/pivot.*
 
 %changelog
+* Mon Mar 11 2019 Yu Qi Zhang <jerzhang@redhat.com> - 0.0.3-4
+- Don't pivot if identical sha256
+
 * Tue Mar 05 2019 Yu Qi Zhang <jerzhang@redhat.com> - 0.0.3-3
 - Use kubelet auth if available
 
