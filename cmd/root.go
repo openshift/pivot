@@ -182,7 +182,7 @@ func Execute(cmd *cobra.Command, args []string) {
 	if fromFile {
 		if err := os.Remove(etcPivotFile); err != nil {
 			if !os.IsNotExist(err) {
-				glog.Fatal("Failed to delete %s: %v", etcPivotFile, err)
+				glog.Fatalf("Failed to delete %s: %v", etcPivotFile, err)
 			}
 		}
 	}
