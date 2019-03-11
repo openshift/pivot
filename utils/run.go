@@ -32,15 +32,10 @@ func runImpl(capture bool, command string, args ...string) ([]byte, error) {
 	return []byte{}, nil
 }
 
-// RunExt executes a command, optionally capturing the output and retrying multiple
-// times before exiting with a fatal error.
-func RunExt(capture bool, retries int, command string, args ...string) string {
+// runExtBackoff is an extension to runExt that supports configuring retries/duration/backoff.
+func runExtBackoff(capture bool, backoff wait.Backoff, command string, args ...string) string {
 	var output string
-	err := wait.ExponentialBackoff(wait.Backoff{
-		Steps:    retries + 1,     // times to try
-		Duration: 5 * time.Second, // sleep between tries
-		Factor:   2,               // factor by which to increase sleep
-	}, func() (bool, error) {
+	err := wait.ExponentialBackoff(backoff, func() (bool, error) {
 		if out, e := runImpl(capture, command, args...); e != nil {
 			glog.Warningf("%s failed: %v; retrying...", command, e)
 			return false, nil
@@ -53,6 +48,17 @@ func RunExt(capture bool, retries int, command string, args ...string) string {
 		glog.Fatalf("%s: %s", command, err)
 	}
 	return output
+}
+
+// RunExt executes a command, optionally capturing the output and retrying multiple
+// times before exiting with a fatal error.
+func RunExt(capture bool, retries int, command string, args ...string) string {
+	return runExtBackoff(capture, wait.Backoff{
+		Steps:    retries + 1,     // times to try
+		Duration: 5 * time.Second, // sleep between tries
+		Factor:   2,               // factor by which to increase sleep
+	},
+		command, args...)
 }
 
 // Run executes a command, logging it, and exit with a fatal error if
