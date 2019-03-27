@@ -1,8 +1,8 @@
 %define debug_package %{nil}
 
 Name:           pivot
-Version:        0.0.3
-Release:        4%{?dist}
+Version:        0.0.4
+Release:        1%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
 License:        ASL 2.0
@@ -13,6 +13,7 @@ Source0:        https://github.com/openshift/%{name}/archive/v%{version}.tar.gz
 
 BuildRequires:  git
 BuildRequires:  %{?go_compiler:compiler(go-compiler)}%{!?go_compiler:golang >= 1.6.2}
+Requires:       rpm-ostree>=2019.3
 
 %description
 pivot provides a simple command allowing you to move from one OSTree
@@ -39,6 +40,21 @@ make install DESTDIR=%{buildroot}
 %{_prefix}/lib/systemd/system/pivot.*
 
 %changelog
+* Wed Mar 27 2019 Steve Milner <smilner@redhat.com> - 0.0.4-1
+- Add basic kernel tuning functionality
+- Fix previous release bump
+- Don't pivot if identical sha256
+- vendor: Add github.com/containers/image/docker/reference
+- travis: Run tests
+- tests: Make TestRunExt predictable and fast
+- root: Fix missing format specifier
+- Use kubelet auth if available
+- README.md: Add some more concrete details on how it works
+- service: Use Type=oneshot
+- README.md: Add some more links for testing pivot
+- README.md: Fix reboot-needed path
+- tests: Set GOCACHE=off
+
 * Mon Mar 11 2019 Yu Qi Zhang <jerzhang@redhat.com> - 0.0.3-4
 - Don't pivot if identical sha256
 
