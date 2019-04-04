@@ -289,7 +289,7 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 	}
 
 	// Pull the image
-	podmanArgs := []string{"pull"}
+	podmanArgs := []string{"pull", "-q"}
 	podmanArgs = append(podmanArgs, authArgs...)
 	podmanArgs = append(podmanArgs, imgid)
 	utils.RunExt(false, numRetriesNetCommands, "podman", podmanArgs...)
