@@ -2,18 +2,18 @@
 
 Name:           pivot
 Version:        0.0.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
 License:        ASL 2.0
 URL:            https://github.com/openshift/pivot
-Source0:        https://github.com/openshift/%{name}/archive/v%{version}.tar.gz
+Source0:        https://github.com/openshift/%{name}/archive/%{version}.tar.gz
 
 
 
 BuildRequires:  git
 BuildRequires:  %{?go_compiler:compiler(go-compiler)}%{!?go_compiler:golang >= 1.6.2}
-Requires:       rpm-ostree>=2019.3
+Requires:       rpm-ostree >= 2019.3
 
 %description
 pivot provides a simple command allowing you to move from one OSTree
@@ -40,6 +40,9 @@ make install DESTDIR=%{buildroot}
 %{_prefix}/lib/systemd/system/pivot.*
 
 %changelog
+* Mon Apr 08 2019 Steve Milner <smilner@redhat.com> - 0.0.4-2
+- Fix requires line in spec
+
 * Wed Mar 27 2019 Steve Milner <smilner@redhat.com> - 0.0.4-1
 - Add basic kernel tuning functionality
 - Fix previous release bump
