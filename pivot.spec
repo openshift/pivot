@@ -1,8 +1,8 @@
 %define debug_package %{nil}
 
 Name:           pivot
-Version:        0.0.4
-Release:        2%{?dist}
+Version:        0.0.5
+Release:        1%{?dist}
 Summary:        allows moving from one OSTree deployment to another
 
 License:        ASL 2.0
@@ -40,6 +40,9 @@ make install DESTDIR=%{buildroot}
 %{_prefix}/lib/systemd/system/pivot.*
 
 %changelog
+* Thu Apr 25 2019 Colin Walters <walters@redhat.com> - 0.0.5-1
+- New upstream release
+
 * Mon Apr 08 2019 Steve Milner <smilner@redhat.com> - 0.0.4-2
 - Fix requires line in spec
 
