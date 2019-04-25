@@ -17,7 +17,7 @@ type ImageInspection struct {
 	Name          string `json:",omitempty"`
 	Tag           string `json:",omitempty"`
 	Digest        digest.Digest
-	RepoTags      []string
+	RepoDigests   []string
 	Created       *time.Time
 	DockerVersion string
 	Labels        map[string]string

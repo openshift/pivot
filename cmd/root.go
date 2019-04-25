@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
 	// Enable sha256 in container image references
 	_ "crypto/sha256"
 
@@ -46,11 +47,11 @@ var tuneableArgsWhitelist = map[string]bool{
 
 // RootCmd houses the cobra config for the main command
 var RootCmd = &cobra.Command{
-	Use: "pivot [FLAGS] [IMAGE_PULLSPEC]",
+	Use:                   "pivot [FLAGS] [IMAGE_PULLSPEC]",
 	DisableFlagsInUseLine: true,
-	Short: "Allows moving from one OSTree deployment to another",
-	Args:  cobra.MaximumNArgs(1),
-	Run:   Execute,
+	Short:                 "Allows moving from one OSTree deployment to another",
+	Args:                  cobra.MaximumNArgs(1),
+	Run:                   Execute,
 }
 
 // init executes upon import
@@ -268,31 +269,44 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 		authArgs = append(authArgs, "--authfile", kubeletAuthFile)
 	}
 
-	// Use skopeo to canonicalize to $name@$digest, so we can refer to it reliably
-	skopeoArgs := []string{"inspect"}
-	skopeoArgs = append(skopeoArgs, authArgs...)
-	skopeoArgs = append(skopeoArgs, fmt.Sprintf("docker://%s", container))
-	output := utils.RunExt(true, numRetriesNetCommands, "skopeo", skopeoArgs...)
+	// If we're passed a non-canonical image, resolve it to its sha256 now
+	isCanonicalForm := true
+	if _, err := getRefDigest(container); err != nil {
+		isCanonicalForm = false
+		// In non-canonical form, we pull unconditionally right now
+		args := []string{"pull", "-q"}
+		args = append(args, authArgs...)
+		args = append(args, container)
+		utils.RunExt(false, numRetriesNetCommands, "podman", args...)
+	} else {
+		targetMatched, err := compareOSImageURL(previousPivot, container)
+		if err != nil {
+			glog.Fatalf("%v", err)
+		}
+		if targetMatched {
+			changed = false
+			return
+		}
 
-	var imagedata types.ImageInspection
-	json.Unmarshal([]byte(output), &imagedata)
-	imgid = fmt.Sprintf("%s@%s", imagedata.Name, imagedata.Digest)
-	glog.Infof("Resolved to: %s", imgid)
-
-	targetMatched, err := compareOSImageURL(previousPivot, imgid)
-	if err != nil {
-		glog.Fatalf("%v", err)
+		// Pull the image
+		args := []string{"pull", "-q"}
+		args = append(args, authArgs...)
+		args = append(args, container)
+		utils.RunExt(false, numRetriesNetCommands, "podman", args...)
 	}
-	if targetMatched {
-		changed = false
-		return
-	}
 
-	// Pull the image
-	podmanArgs := []string{"pull", "-q"}
-	podmanArgs = append(podmanArgs, authArgs...)
-	podmanArgs = append(podmanArgs, imgid)
-	utils.RunExt(false, numRetriesNetCommands, "podman", podmanArgs...)
+	inspectArgs := []string{"inspect", "--type=image"}
+	inspectArgs = append(inspectArgs, fmt.Sprintf("%s", container))
+	output := utils.RunExt(true, 1, "podman", inspectArgs...)
+	var imagedataArray []types.ImageInspection
+	json.Unmarshal([]byte(output), &imagedataArray)
+	imagedata := imagedataArray[0]
+	if !isCanonicalForm {
+		imgid = imagedata.RepoDigests[0]
+		glog.Infof("Resolved to: %s", imgid)
+	} else {
+		imgid = container
+	}
 
 	// Clean up a previous container
 	podmanRemove(types.PivotName)
