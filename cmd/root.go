@@ -102,14 +102,13 @@ func parseTuningFile(tuningFilePath, cmdLinePath string) ([]types.TuneArgument, 
 	}
 	// Read and parse the file
 	file, err := os.Open(tuningFilePath)
-	// Clean up
-	defer file.Close()
-
 	if err != nil {
 		// If we have an issue reading return an error
 		glog.Infof("Unable to open %s for reading: %v", tuningFilePath, err)
 		return addArguments, deleteArguments, err
 	}
+	// Clean up
+	defer file.Close()
 
 	// Parse the tuning lines
 	scanner := bufio.NewScanner(file)
