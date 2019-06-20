@@ -1,5 +1,8 @@
 pivot ➰
 ========
+
+**Deprecated**: Please see [machine-config-operator](https://github.com/openshift/machine-config-operator/tree/master/pkg/daemon/pivot).
+
 [![Build Status](https://travis-ci.org/openshift/pivot.svg)](https://travis-ci.org/openshift/pivot/)
 
 `pivot` provides a simple command allowing you to upgrade an
