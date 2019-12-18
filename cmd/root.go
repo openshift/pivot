@@ -17,6 +17,7 @@ import (
 	"github.com/openshift/pivot/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/util/uuid"
 
 	imgref "github.com/containers/image/docker/reference"
 )
@@ -307,11 +308,18 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 		imgid = container
 	}
 
-	// Clean up a previous container
-	podmanRemove(types.PivotName)
+	// Clean up any previous container which used the old name
+	podmanRemove(types.OldPivotName)
+
+	containerName := types.PivotNamePrefix + string(uuid.NewUUID())
 
 	// `podman mount` wants a container, so let's make create a dummy one, but not run it
-	cid := utils.RunGetOut("podman", "create", "--net=none", "--name", types.PivotName, imgid)
+	cid := utils.RunGetOut("podman", "create", "--net=none", "--annotation=org.openshift.machineconfigoperator.pivot=true", "--name", containerName, imgid)
+
+	defer func() {
+		// Kill our dummy container
+		podmanRemove(containerName)
+	}()
 	// Use the container ID to find its mount point
 	mnt := utils.RunGetOut("podman", "mount", cid)
 	repo := fmt.Sprintf("%s/srv/repo", mnt)
@@ -349,9 +357,6 @@ func pullAndRebase(container string) (imgid string, changed bool) {
 		fmt.Sprintf("%s:%s", repo, ostree_csum),
 		"--custom-origin-url", customURL,
 		"--custom-origin-description", "Managed by pivot tool")
-
-	// Kill our dummy container
-	podmanRemove(types.PivotName)
 
 	changed = true
 	return
