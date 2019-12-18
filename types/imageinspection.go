@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	// PivotName is literally the name of the new pivot
-	PivotName = "ostree-container-pivot"
+	OldPivotName    = "ostree-container-pivot"
+	// PivotNamePrefix is literally the name prefix of the new pivot
+	PivotNamePrefix = "ostree-container-pivot-"
 )
 
 // ImageInspection is a public implementation of
